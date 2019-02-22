@@ -1,3 +1,6 @@
+# MachineLearning 0.0.3
+* Fix a bug in CART function
+
 # MachineLearning 0.0.2
 * Correct CRAN errors
 
