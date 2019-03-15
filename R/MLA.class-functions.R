@@ -26,13 +26,12 @@
 
 #' @export
 #### General Print of MLA ####
-### MassiveDataAnalysis, MachineLearning, DataMining
 print.MLA <- function(x, first=100 ,digits = getOption("digits"), ...) {
 
   if (!inherits(x, "MLA")) stop("Not a legitimate \"MLA\" object")
 
   switch(x[[1]],
-         "CART" = printCART(x[[2]], digits),
+         "CART" = printCART(x, digits),
 
          "Var-Rank"={
            printSelector(x[[2]])
@@ -41,10 +40,10 @@ print.MLA <- function(x, first=100 ,digits = getOption("digits"), ...) {
            printCREARBS(x[[2]])
          },
          "Association"={
-           printAsociationRules(x[[2]],first=first, digits=digits)
+           printAssociationRules(x[[2]],first=first, digits=digits)
          },
-         "Cluster"={
-           printCluster(x[[2]])
+         "Clustering"={
+           printCluster(x)
          }
 
 
@@ -55,16 +54,16 @@ print.MLA <- function(x, first=100 ,digits = getOption("digits"), ...) {
 printCART <- function(x, decimals=getOption("digits")) {
 
       cat(
-        nrow(x),
+        nrow(x[[3]]),
         format("successful models have been tested \n"),
         format("\n")
       )
-      print(x,digits=decimals)
+      print(x[[2]],digits=decimals)
 
 }
 
 # Print Asociation Rules
-printAsociationRules  <- function(x, first=100, digits = getOption("digits")) {
+printAssociationRules  <- function(x, first=100, digits = getOption("digits")) {
 
   if(length(arules::size(x))>first){
     printable_rules <- x[1:first,]
@@ -77,6 +76,9 @@ printAsociationRules  <- function(x, first=100, digits = getOption("digits")) {
 
 # Print Cluster
 printCluster <- function(x){
+  if(length(x[[4]])!=0){
+  cat(length(x[[4]][[1]]),"successful techniques are used to obtain the best number of clusters. \n")
+  }
   print(x)
 }
 
@@ -93,33 +95,98 @@ printSelector <- function(x){
 
 
 #### General Summary of MLA ####
-summary.MLA <- function(x, first=100, digits = getOption("digits"), ...) {
-  print(x)
+#' @export
+summary.MLA <- function(object, ...) {
+  print(object)
 }
 
 #### General Plot of MLA ####
-plot.MLA <- function(object,...){
-  if (!inherits(object, "MLA")) stop("Not a legitimate \"MLA\" object")
+#' Plot MLA object
+#'
+#' @name plot.MLA
+#' @description This function plot an MLA object. It is a method for the generic function plot.
+#'
+#' @param x object of class "MLA"
+#' @param simply Allow to simplify the view of nodes, in case of MLA object is a CART. Default value is FALSE.
 
-  switch(object[[1]],
+#' @param ... further arguments passed to or from other methods.
+#'
+#' @export
+plot.MLA <- function(x,simply=FALSE,...){
+  if (!inherits(x, "MLA")) stop("Not a legitimate \"MLA\" object")
+
+  switch(x[[1]],
          "CART" = {
-           plotCART(object[[2]])
+           plotCART(x[[2]],ownlabs=simply)
          },
          "GainRatio"={
-           plotSelector(object[[2]])
+           plotSelector(x[[2]])
          },
          {
-           warning(paste0('So sorry, this method is not yet implemented for ', object[[1]]))
+           warning(paste0('So sorry, this method is not yet implemented for ', x[[1]]))
          }
   )}
 
 
 #### Helpers to plot for MLA class ####
-plotCART <- function(x){
-rpart.plot(x)
+#' Plot rpart or MLA object
+#'
+#' @name plotCART
+#' @description This function plot an MLA object or a rpart.
+#'
+#' @param x object of class "MLA" or "rpart".
+#' @param ownlabs Allow to simplify the view of nodes. Default value is TRUE.
+
+#' @param ... further arguments passed to or from other methods.
+#'
+
+
+#' @export
+plotCART <- function(x,ownlabs=TRUE){
+  if (!inherits(x, c("MLA", "rpart"))) stop("Not a legitimate \"MLA\" or \"rpart\" object")
+  if(inherits(x, "MLA")){
+    x <- x[[2]]
+  }
+  if(ownlabs==FALSE){
+    rpart.plot(x)
+  } else{
+    nodeCLASS <- function(x, labs, digits, varlen) {
+      data <- as.data.frame(do.call("rbind", strsplit(labs,"\n")),stringsAsFactors = FALSE)
+      Matriz <- do.call("rbind",strsplit(data$V2,"  "))
+      Matriz <- apply(Matriz, 1,as.numeric)*100
+      Matriz <- apply(Matriz, 2,function(x) paste0(x, "%",collapse="  "))
+      data[,2] <- Matriz
+      apply(data,1,function(x) paste0(x, collapse="\n"))
+    }
+
+    nodeBIN <- function(x, labs, digits, varlen) {
+      data <- as.data.frame(do.call("rbind", strsplit(labs,"\n")),stringsAsFactors = FALSE)
+      Matriz <- do.call("rbind",strsplit(data$V2,"  "))
+      Matriz <- apply(Matriz, 1,as.numeric)*100
+      Matriz <- apply(Matriz, 2,function(x) paste0(x, "%",collapse="  "))
+      data[,2] <- Matriz
+      apply(data,1,function(x) paste0(x, collapse="\n"))
+    }
+    nodeREG <- function(x, labs, digits, varlen) {
+      # save(x, labs,digits,varlen,file="Test.Rda")
+      #
+      # ValorEstimado <- x$frame$yval
+      # Confianza <- x$frame$n/x$frame$n[1]
+      # paste0(ValorEstimado,"\n",round(Confianza*100,2),"%")
+paste(labs)
+}
+    class <- x$method
+    nodefun <- switch(class,
+                        "anova"=nodeREG,
+                        "poisson"=nodeBIN,
+                        "class"=nodeCLASS,
+                          nodeREG)
+    rpart.plot(x,node.fun=nodefun)
+  }
   }
 
 utils::globalVariables("importance")
+
 plotSelector <- function(x){
   Rank_graph <- x
   Rank_graph$attributes <- factor(Rank_graph$attributes, levels =  rev(Rank_graph$attributes))
