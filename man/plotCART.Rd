@@ -4,7 +4,7 @@
 \alias{plotCART}
 \title{Plot rpart or MLA object}
 \usage{
-plotCART(x, ownlabs = TRUE)
+plotCART(x, ownlabs = TRUE, ...)
 }
 \arguments{
 \item{x}{object of class "MLA" or "rpart".}

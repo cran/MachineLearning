@@ -4,9 +4,15 @@
 \alias{Clustering}
 \title{A simple and powerful function to create clusters with KMeans}
 \usage{
-Clustering(data, n = "auto", n_max = 10, iter.max = 10,
-  auto_criterion = c("explainwss", "db", "ratkowsky", "ball",
-  "friedman"), confidenceWSS = 0.9, agregate_method = median)
+Clustering(
+  data,
+  n = "auto",
+  n_max = 10,
+  iter.max = 10,
+  auto_criterion = c("explainwss", "db", "ratkowsky", "ball", "friedman"),
+  confidenceWSS = 0.9,
+  agregate_method = median
+)
 }
 \arguments{
 \item{data}{Data frame which numeric variables.}

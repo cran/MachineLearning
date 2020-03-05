@@ -4,8 +4,16 @@
 \alias{CART}
 \title{Fit and graph a cart model}
 \usage{
-CART(formula, data, p = 0.7, nodes_min = 2, nodes_max = 18,
-  includedata = FALSE, seed = NULL, ...)
+CART(
+  formula,
+  data,
+  p = 0.7,
+  nodes_min = 2,
+  nodes_max = 18,
+  includedata = FALSE,
+  seed = NULL,
+  ...
+)
 }
 \arguments{
 \item{formula}{a formula of the form y ~ x1 + x2 + ...}

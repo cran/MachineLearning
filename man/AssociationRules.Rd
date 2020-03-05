@@ -4,8 +4,7 @@
 \alias{AssociationRules}
 \title{Simple way to obtain data mining rules}
 \usage{
-AssociationRules(data, support = 0.2, confidence = 0.1,
-  minlength = 2)
+AssociationRules(data, support = 0.2, confidence = 0.1, minlength = 2)
 }
 \arguments{
 \item{data}{a data frame with discrete variables.}
